@@ -1,6 +1,6 @@
 import { Hono } from "hono"
 import { getDb } from '../data/db.js'
-import { createTask, listTasksByProject, } from '../data/store.js'
+import { createTask, listTasksByProject, } from '../data/tasks.repository.js'
 import { listProjects, createProject, updateProject, deleteProject, getProjectById } from '../data/projects.repository.js'
 
 import { parseJsonBody } from '../utils/body.js'
@@ -44,7 +44,7 @@ projects.get('/:id/tasks', async (c) => {
     throw new ApiError(404, 'NOT_FOUND', 'Project not found.')
   }
 
-  const data = listTasksByProject(projectId)
+  const data = await listTasksByProject(db, projectId)
   return sendCollection(c, data)
 })
 
@@ -69,7 +69,7 @@ projects.post('/:id/tasks', async (c) => {
     )
   }
 
-  const task = createTask(projectId, payload)
+  const task = await createTask(db, projectId, payload)
   c.header('Location', `/api/tasks/${task.id}`)
   return sendResource(c, task, 201)
 })
